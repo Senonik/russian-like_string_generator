@@ -9,9 +9,9 @@ describe "rl_string_generator" do
     end
   end
 
-  it "should not contain latin letters, digits or underlines_" do
+  it "should contain only valid symbols" do
     1001.times do
-      expect(rl_str_gen.match?(/\w+/)).to be false
+      expect(rl_str_gen.match?(/[^а-яё ,\.:;!\?\'\"-]/i)).to be false
     end
   end
 
@@ -58,9 +58,14 @@ describe "rl_string_generator" do
   end
 
   it "should not allow unwanted symbols inside words" do
-    1000.times do
-
+    1001.times do
+      expect(rl_str_gen.match?(/[а-яё\-][^а-яё \-]+[а-яё\-]/i)).to be false
+     # words = rl_str_gen.split.reject{|el| el == "-"}
+     # /\A[\"\']?[а-яё]+(?:-[а-яё]+)\z/i
+      # sub(/(\.\.\.|!\?|[.,:;\?\!])\z/, "")
     end
   end
 
+  it "should be allow multiply dashes" do
+  end
 end
