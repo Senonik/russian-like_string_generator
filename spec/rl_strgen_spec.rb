@@ -11,7 +11,7 @@ describe "rl_string_generator" do
 
   it "should contain only valid symbols" do
     1001.times do
-      expect(rl_str_gen.match?(/[^а-яё ,\.:;!\?\'\"-]/i)).to be false
+      expect(rl_str_gen.match?(/[^а-яё ,\.:;!\?\'\"\-]/i)).to be false
     end
   end
 
@@ -41,9 +41,10 @@ describe "rl_string_generator" do
   
   it "should allow only particular signs after words withing sentence" do
     1001.times do
-     withing = rl_str_gen.split.reject{|el| el == "-"}[0..-2]
-     expect(withing.select{|el| el[-1].match? /[^,:\"\'а-яё]/i}.size)
-                                      .to eq(0)
+     withing = rl_str_gen.split.reject{|el| el == "-"}[0..-2] # удаляем тире
+     expect(withing.reject{|el| el.match? /[а-яё][\'\"]?[,:;]?\z/i}
+                   .size)
+                   .to eq(0)
     end
   end
 
@@ -54,18 +55,25 @@ describe "rl_string_generator" do
     end
   end
 
-  it "should be allow multiply punctuation" do
-  end
-
   it "should not allow unwanted symbols inside words" do
     1001.times do
       expect(rl_str_gen.match?(/[а-яё\-][^а-яё \-]+[а-яё\-]/i)).to be false
-     # words = rl_str_gen.split.reject{|el| el == "-"}
-     # /\A[\"\']?[а-яё]+(?:-[а-яё]+)\z/i
-      # sub(/(\.\.\.|!\?|[.,:;\?\!])\z/, "")
     end
   end
 
   it "should be allow multiply dashes" do
   end
+
+  it "should exclude unwanted symbols before word's " do
+    1001.times do
+      expect(rl_str_gen.match?(/(?<![а-яё])[^ \'\"а-яё]+\b[а-яё]/i))
+                      .to be false
+    end
+  end
 end
+
+
+
+     # words = rl_str_gen.split.reject{|el| el == "-"}
+     # /\A[\"\']?[а-яё]+(?:-[а-яё]+)\z/i
+      # sub(/(\.\.\.|!\?|[.,:;\?\!])\z/, "")
