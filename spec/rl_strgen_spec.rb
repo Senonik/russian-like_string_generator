@@ -106,11 +106,13 @@ describe "rl_string_generator" do
     end
   end
   
+  
   it "should always have a vowel after й at the beginning of the world" do
     1001.times do
       expect(rl_str_gen.match?(/\bй[^ео]/i)).to be false
     end
   end
+  
   
   it "should not allow more than 4 consonant letters in a row" do
   end
@@ -126,6 +128,7 @@ describe "rl_string_generator" do
     end
   end
 
+  
   it "should contain vowels if more then 1 letters and not acronim" do
   end
 
@@ -145,7 +148,7 @@ describe "rl_string_generator" do
     end
   end
 
-  # 25 % вместо 40 %
+
   it "should contain at least 40% vowels in multisyllable words" do
     1001.times do
       rl_str_gen.gsub(/[^а-яё ]/i, "")
@@ -154,11 +157,53 @@ describe "rl_string_generator" do
         .each do |el|
           unless el.match?(/\A[А-ЯЁ]{2,}\z/)
             found = el.scan(/[аеёиоуыэюя]/i).size
-            calc  = (el.size*0.40).to_i
+            calc  = ((el.size - (el.scan(/[ъь]/i).size))*0.40).to_i
             res   = found >= calc ? ">=#{calc} vowels" : "#{found} vowels"
             expect([res, el]).to eq([">=#{calc} vowels", el])
           end
         end
+    end
+  end
+
+
+  it "should contain 5 or less consonant letters in single-syllable words" do
+      1001.times do
+      rl_str_gen.gsub(/[^а-яё -]/i, "").split
+                .reject{|w| w.match?(/-|([аеёиоуыэюя].*[аеёиоуыэюя])/i)||
+                            w.match?(/\b[А-ЯЁ]{2,}\b/) }
+                .each do |w|
+                  expect(w.size).to be <= 6
+                end
+      end
+  end
+
+
+  it "should allow я,е,ё,ю after ъ" do
+    1001.times do
+      expect(rl_str_gen.gsub(/\b[А-ЯЁ]{2,}\b/, "")
+                       .match(/ъ[^яеёю]/i)).to be nil
+    end
+  end
+
+
+  it "should not allow add the beginning of the word in single-syllable"\
+     " words if they have 3 or more letters" do
+      1001.times do
+         rl_str_gen.gsub(/[^а-яё -]/i,"").split
+                    .reject{|w| w.match?(/-|([аеёиоуыэюя].*[аеёиоуыэюя])/i) ||
+                                w.match?(/\A[А-ЯЁ]{2,}\z/) ||
+                                w.size < 3 }
+                    .each do |w|
+                      expect(w).to match(/\A[^аеёиоуыэюя]/i)
+                    end
+      end
+  end  
+
+  
+  it "should forbit Ь and Ъ in acronims" do
+    1001.times do
+      expect(rl_str_gen.match(/(?=\b[А-ЯЁ]{2,}\b)\b[А-ЯЁ]*[ЬЪ][А-ЯЁ]*\b/))
+                       .to be nil
     end
   end
 
