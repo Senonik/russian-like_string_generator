@@ -3,11 +3,13 @@ require_relative "../app/methods"
 
 describe "rl_string_generator" do
 
+
   it "should return a string" do
     1001.times do
       expect(rl_str_gen).to be_an_instance_of(String)
     end
   end
+
 
   it "should contain only valid symbols" do
     1001.times do
@@ -67,9 +69,9 @@ describe "rl_string_generator" do
   end
 
   
-  it "should be allow multiply punctuation marks" do
+  it "should not allow multiply punctuation marks" do
     1001.times do
-      expect(rl_str_gen.match?(/([^а-яё.])*\1/i)).to be false
+      expect(rl_str_gen.match?(/([^а-яё\.]) *\1/i)).to be false
     end
   end
 
@@ -82,7 +84,7 @@ describe "rl_string_generator" do
   end
 
   
-  it "should be corretly use quotes" do
+  it "should corretly use quotation marks" do
     1001.times do
       expect(rl_str_gen.scan(/\"/).size.even?).to be true
       expect(rl_str_gen.scan(/\".+?\"/)               # нежадный +
@@ -99,52 +101,70 @@ describe "rl_string_generator" do
     end
   end
 
-  #
+
   it "should not contain capital letters inside words if not an acronim" do
-    1001.times do
-      expect(rl_str_gen.match?(/\b[а-яё]+[А-ЯЁ]+/)).to be false
+    1001.times do         # сделал по-своему
+      expect(rl_str_gen.match?(/\b([А-ЯЁ]+)?[а-яё]+[А-ЯЁ]+/)).to be false
     end
   end
   
+
+  it "should allow acronims only from 2 to 5 letters" do
+    1001.times do         # сделал по-своему
+      expect(rl_str_gen.match?(/\b\"?[А-ЯЁ]{6,}\b/)).to be false
+    end
+  end
+
   
+  it "should not allow one-letter words with a capital letter" do
+    1001.times do
+      expect(rl_str_gen.match(/\b[А-ЯЁ]\b/)).to be nil
+    end
+  end
+
+
   it "should always have a vowel after й at the beginning of the world" do
     1001.times do
       expect(rl_str_gen.match?(/\bй[^ео]/i)).to be false
     end
   end
   
-  
-  it "should not allow more than 4 consonant letters in a row" do
+
+  it "should allow only particular letters after й inside words" do
+    1001.times do
+      expect(rl_str_gen.match(/\Bй[ьъыёуиаэюяжй]/i)).to be nil
+    end
   end
   
-  it "should not allow more than 2 vowel letters in a row" do
-  end
+
+  # 18 сделать
+  it "should always be vowel in 2- and 3- letter words"
+
+
+  # 19 сделать
+  it "should allow only particular one-letter words" # убрать ж и б
+
+
+  # 20 сделать
+  it "should not allow more than 4 consonant letters in a row"
   
+
+  # 21 сделать
+  it "should not allow more than 2 vowel letters in a row"
+  
+
   # возможно сделать проверку сразу на все буквы, т.к. больше 2-х гласных 
   # подряд тоже не следует допускать. исключение еее на конце слова
   it "should not allow more than 2 same consonant letters in a row" do
-    1001.times do
-      expect(rl_str_gen.match?(/([а-яё])\1\1+/)).to be false
+    1001.times do         # сделал по-своему
+      expect(rl_str_gen.match?(/([^аеёиоуыэюя])\1\1/)).to be false
     end
   end
 
-  
-  it "should contain vowels if more then 1 letters and not acronim" do
-  end
 
-  # more than 5 letters
-  it "should allow acronims only from 2 to 5 letters" do
+  it "should start with a capital letter" do
     1001.times do
-      expect(rl_str_gen.match?(/\b[А-ЯЁ]{6,}\b/)).to be false
-    end
-  end
-
-  #
-  it "should not allow one-letter words with a capital letter
-      exept preposition at the beginning of the sentence" do
-    1001.times do
-      expect(rl_str_gen.match(/(\A[ЯВКОСУИА]\b)?.*?(?=\b[А-ЯЁ]\b)/)).to be nil
-      # expect(rl_str_gen.match?(/\b[А-ЯЁ]\b/)).to be false
+      expect(rl_str_gen).to be match(/\A\"?[А-ЯЁ]/)
     end
   end
 
@@ -186,8 +206,8 @@ describe "rl_string_generator" do
   end
 
 
-  it "should not allow add the beginning of the word in single-syllable"\
-     " words if they have 3 or more letters" do
+  it "should not allow a vowel at the beginning of the word"\
+     "in single-syllable words if they have 3 or more letters" do
       1001.times do
          rl_str_gen.gsub(/[^а-яё -]/i,"").split
                     .reject{|w| w.match?(/-|([аеёиоуыэюя].*[аеёиоуыэюя])/i) ||
@@ -207,10 +227,7 @@ describe "rl_string_generator" do
     end
   end
 
+  # it "should contain vowels if more then 1 letters and not acronim"
+
 end
 
-
-    # expect(str.match(/(/[а-яё]+(?:-[а-яё]+)?){16,}/i)).to be nil
-    # words = rl_str_gen.split.reject{|el| el == "-"}
-    # /\A[\"]?[а-яё]+(?:-[а-яё]+)\z/i
-    # sub(/(\.\.\.|!\?|[.,:;\?\!])\z/, "")
