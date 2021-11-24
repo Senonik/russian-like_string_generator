@@ -30,7 +30,8 @@ describe "rl_string_generator" do
       str = rl_str_gen
 
       expect(str.size).to be <= 300
-      expect(str.gsub("- ","").match?(/\A *(?:[^ ]+ +){1,14}[^ ]+\z/)).to be true
+      expect(str.gsub("- ","").match?(/\A *(?:[^ ]+ +){1,14}[^ ]+\z/))
+            .to be true
     end
   end
 
@@ -137,20 +138,49 @@ describe "rl_string_generator" do
   end
   
 
-  # 18 сделать
-  it "should always be vowel in 2- and 3- letter words"
+  it "should always be vowel in 2- and 3- letter words" do
+    1000.times do
+      rl_str_gen.gsub(/[^а-яё ]/i, "")
+                .split
+                .select { |el| el.size == 2 or el.size == 3}
+                .reject { |el| el.match?(/\A[А-ЯЁ]+\z/)}
+      .each do |w|
+        expect(w).to match(/[аоуэыияеёю]/i)
+      end
+    end
+  end
 
 
-  # 19 сделать
-  it "should allow only particular one-letter words" # убрать ж и б
+  it "should allow only particular one-letter words" do
+    1000.times do
+      rl_str_gen.scan(/\b[а-яё]\b/i).each do |word|
+        expect(word).to match(/[аявуоикс]/i) # отказались от ж и б
+      end
+    end
+  end
 
 
-  # 20 сделать
-  it "should not allow more than 4 consonant letters in a row"
-  
+  it "should not allow more than 4 consonant letters in a row" do
+    1000.times do
+      rl_str_gen.gsub(/[^а-яё ]/i, "").split.each do |el|
+        unless el.match? /\A[А-ЯЁ]{2,}\z/
+          expect(el.match /[^аоуэыияеёю ]{5,}/i).to be_nil
+        end
+      end
+    end
 
-  # 21 сделать
-  it "should not allow more than 2 vowel letters in a row"
+  end
+
+
+  it "should not allow more than 2 vowel letters in a row" do
+    1000.times do
+      rl_str_gen.gsub(/[^а-яё ]/i, "").split.each do |el|
+        unless el.match? /\A[А-ЯЁ]{2,}\z/
+          expect(el.match /[аоуэыияеёю]{3,}/i).to be_nil
+        end
+      end
+    end
+  end
   
 
   # возможно сделать проверку сразу на все буквы, т.к. больше 2-х гласных 
@@ -230,4 +260,3 @@ describe "rl_string_generator" do
   # it "should contain vowels if more then 1 letters and not acronim"
 
 end
-
