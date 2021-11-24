@@ -44,6 +44,15 @@ ONE_LETTER_WORDS_FREQ = {1080 => 358,
                          1086 => 34}.freeze
 
 
+VOWELS     = [1072, 1077, 1080, 1086, 1091, 1099, 1101, 1102, 1103, 1105]
+
+CONSONANTS = [*1073..1076, 1078, 1079, *1081..1085, *1087..1090, *1092..1097]
+
+def select_letters(arr)
+  LETTERS_FREQ.select{ |k, v| arr.any? k }
+end
+
+
 def provide_distribution(hash)
   sample_array = []
   hash.each_key do |k|
@@ -58,31 +67,17 @@ end
 
 ONE_LETTER_WORDS_PROBABILITY_ARRAY = provide_distribution(ONE_LETTER_WORDS_FREQ)
 
-LETTERS_PROBABILITY_ARRAY          = provide_distribution(LETTERS_FREQ)
+VOWELS_PROBABILITY_ARRAY      = provide_distribution(select_letters(VOWELS))
 
+CONSONANTS_PROBABILITY_ARRAY  = provide_distribution(select_letters(CONSONANTS))
 
 ############################################################################
 
 
 def rl_str_gen
-  base_string
+  words_gen(plane_words).map{ |a| a << 32 }.flatten[0..-2].pack("U*")
 end  
   
-
-def base_string
-        # числа, соответствующие буквам А-Яа-я,ё,Ё, в кодировке UTF-8
-  x   = [*1040..1103, 1105, 1025]         
-  arr = Array.new(rand(3..250)) {x.sample}
-  i   = rand(1..15)             # количество слов в предложении
-  num_words = 0
-
-  while i < arr.size     # случайным образом расставляем запятые == 32 в UTF-8
-    arr[i] = 32
-    i += rand(2..16)
-  end
-  arr.pack("U*")         # преобразуем массив с int в строку по код-ке UTF-8
-end
-
 
 def plane_words
   
@@ -128,11 +123,13 @@ def plane_words
 
 end
 
-
+     # получаем массив с хэшами, где описаны свойства будущих слов
+     #  согласно этим условиям создаем производный массив, где каждый элемент 
+     # является массивом с int, который в будущем станет словом
 def words_gen (arr)
   
   arr.map do |el|
-    case el.case
+    case el[:case]
       when :acronim
         make_acronim
       when :downcase
@@ -172,7 +169,7 @@ def make_common_word (hash)
   if    hash[:multi_syllable]     # многосложное слово
     word  = generate_multi_syllable_word
   elsif hash[:one_letter]         # однобуквенное только из букв аявуоикс
-    word  = ONE_LETTER_WORDS_PROBABILITY_ARRAY.sample
+    word  = [ONE_LETTER_WORDS_PROBABILITY_ARRAY.sample]
   else
     word  = generate_single_syllable_word
   end
@@ -184,12 +181,53 @@ def make_common_word (hash)
 end
 
 
-def generate_sigle_syllable_word
+def generate_single_syllable_word
 
-  vowel = [1072, 1077, 1105, 1080, 1086, 1091, 1099, 1101, 1102, 1103].sample
+  vowel  = VOWELS_PROBABILITY_ARRAY.sample
   lenght = rand(20) < 15 ? rand(2..4) : rand(5..6)
-  consonant = [*1073..1076, 1078, 1079, *1082..1085, *1087..1090, *1092..1097]
+  word   = Array.new(lenght)
+  
+  case lenght
+   when 2
+    word[rand(2)]    = vowel # и з / н а
+  when 3, 4
+    word[rand(1..2)] = vowel # т и р / д л я / т о р т / с т о л/ 
+  when 5, 6
+    word[-2]         = vowel # с т р и м / в з г л я д
+  end
 
+  short_y_position = word.find(1081)
+
+  if short_y_position
+    word.index(vowel)
+  end
+
+  word.map!{ |el| el ? el : CONSONANTS_PROBABILITY_ARRAY.sample }
+
+  word = manage_y_soft(word)
+
+  occasionally_add_softening_sign(word)
+
+end
+
+
+def occasionally_add_softening_sign(arr)
+  arr
+end
+
+
+def manage_y_soft(arr)
+  arr
+end
+
+
+def add_dash(arr)
+  arr
+end  
+
+
+def generate_multi_syllable_word
+  generate_single_syllable_word + generate_single_syllable_word
 end
 
                 # arr[0] =  {case:          :downcase,

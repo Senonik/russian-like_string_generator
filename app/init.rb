@@ -1,1 +1,3 @@
-require_relative "methods.rb"
+require_relative "methods"
+
+p rl_str_gen

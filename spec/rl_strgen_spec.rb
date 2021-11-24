@@ -260,3 +260,13 @@ describe "rl_string_generator" do
   # it "should contain vowels if more then 1 letters and not acronim"
 
 end
+
+
+describe "nested methods" do
+  it ""
+end
+
+
+describe "resulting sentence" do
+  it ""
+end
