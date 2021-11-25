@@ -79,24 +79,23 @@ def rl_str_gen
 end  
   
 
-def plane_words
-  
-  # "планирование" слов, для каждого слова создается хэш со свойствами
-    # например:
+    # "планирование" слов, для каждого слова создается хэш со свойствами
+    #  например:
     # arr[0] =  {case:          :downcase,
     #           multi_syllable: true,
     #           dash:           true,
     #           one_letter:     false}
+def plane_words
   
   # создаем массив в 2-15 слов, для каждого слова создается хэш со свойствами
   arr = Array.new(rand(2..15)) { {} } 
 
   arr.each do |el|
 
-    case rand(10)             # для каждого слова определяем свойство case
+    case rand(20)             # для каждого слова определяем свойство case
       when 0 
         el[:case] = :acronim  # акроним (только большие буквы)
-      when 1
+      when 1, 2
         el[:case] = :capital  # заглавная только первая буква
       else
         el[:case] = :downcase # только строчные буквы
@@ -122,6 +121,7 @@ def plane_words
   end
 
 end
+
 
      # получаем массив с хэшами, где описаны свойства будущих слов
      #  согласно этим условиям создаем производный массив, где каждый элемент 
@@ -175,7 +175,6 @@ def make_common_word (hash)
   end
 
   word    = add_dash(word) if hash[:dash]
-  
   word
 
 end
@@ -188,12 +187,12 @@ def generate_single_syllable_word
   word   = Array.new(lenght)
   
   case lenght
-   when 2
-    word[rand(2)]    = vowel # и з / н а
-  when 3, 4
-    word[rand(1..2)] = vowel # т и р / д л я / т о р т / с т о л/ 
-  when 5, 6
-    word[-2]         = vowel # с т р и м / в з г л я д
+    when 2
+      word[rand(2)]    = vowel # и з / н а
+    when 3, 4
+      word[rand(1..2)] = vowel # т и р / д л я / т о р т / с т о л/ 
+    when 5, 6
+      word[-2]         = vowel # с т р и м / в з г л я д
   end
 
   short_y_position = word.find(1081)
@@ -203,38 +202,77 @@ def generate_single_syllable_word
   end
 
   word.map!{ |el| el ? el : CONSONANTS_PROBABILITY_ARRAY.sample }
+  
+  finalize_word(word)
+end
 
-  word = manage_y_soft(word)
 
+def finalize_word(word)
+  word = check_same_consonants(word)
+  word = manage_y_short(word)
   occasionally_add_softening_sign(word)
-
 end
 
 
-def occasionally_add_softening_sign(arr)
+def check_same_consonants(arr) # проверить на одинаковые согласные
   arr
 end
 
 
-def manage_y_soft(arr)
+def occasionally_add_softening_sign(arr) # случайно добавить ь
   arr
 end
 
 
-def add_dash(arr)
+def manage_y_short(arr) # расставить й
   arr
-end  
+end
+
+
+def add_dash(arr) # добавить "-"
+  
+  return arr if arr.size < 5 || arr.size > 14
+  vowel_indexes = []
+  arr.each_with_index do |el, i|
+      
+      # создаем массив с индексами гласных границы, в пределах которых ставить -
+    
+    vowel_indexes << i if VOWELS.any?(el)
+  
+  end
+
+    dash_zone_borders = [                 
+                            # не допустить, чтобы - отделил одну гласную слева
+      vowel_indexes[0]  == 0 ? 2 : vowel_indexes[0] + 1,
+                            # не допустить, чтобы - отделил одну гласную справа
+      vowel_indexes[-1] ==(arr.size-1) ? vowel_indexes[-1]-1 : vowel_indexes[-1]
+    ]
+
+    (dash_zone_borders[0]..dash_zone_borders[1]).map{ |i| 
+      next if arr[i] == 1100 # пропускает индекс, если по индексу находится ь
+    }
+
+  arr
+
+end
+
+
+def get_no_insert_range(arr)
+  no_insert = []
+  consonants = 0
+  arr.each_with_index do |el, i|
+    consonants =  VOWELS.any?(el) ?  0 : consonants+1
+    no_insert << ((i-3)..(i+1)) if consonants == 4
+  end
+  no_insert
+end
 
 
 def generate_multi_syllable_word
   generate_single_syllable_word + generate_single_syllable_word
 end
 
-                # arr[0] =  {case:          :downcase,
-                  #           multi_syllable: true,
-                  #           dash:           true,
-                  #           one_letter:     false}
-
+                
   # it "should not contain word over 15 letters"
   # it "should not allow unwanted symbols inside words" 
   # it "should not allow words starting from: ь,ы,ъ" 
