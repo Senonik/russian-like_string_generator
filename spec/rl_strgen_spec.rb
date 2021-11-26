@@ -153,7 +153,7 @@ describe "resulting_string" do
 
 
   it "should start with a capital letter" do
-    expect(@string).to be match(/\A\"?[А-ЯЁ]/)
+    expect(@string).to match(/\A\"?[А-ЯЁ]/)
   end
 
 

@@ -75,7 +75,11 @@ CONSONANTS_PROBABILITY_ARRAY  = provide_distribution(select_letters(CONSONANTS))
 
 
 def rl_str_gen
-  words_gen(plane_words).map{ |a| a << 32 }.flatten[0..-2].pack("U*")
+
+  words = words_gen(plane_words)
+  digital_capitalize(words[0])
+  words.map{ |a| a << 32 }.flatten[0..-2].push(46).pack("U*")
+
 end  
   
 
@@ -85,6 +89,7 @@ end
     #           multi_syllable: true,
     #           dash:           true,
     #           one_letter:     false}
+
 def plane_words
   
   # создаем массив в 2-15 слов, для каждого слова создается хэш со свойствами
@@ -126,6 +131,7 @@ end
      # получаем массив с хэшами, где описаны свойства будущих слов
      #  согласно этим условиям создаем производный массив, где каждый элемент 
      # является массивом с int, который в будущем станет словом
+
 def words_gen (arr)
   
   arr.map do |el|
@@ -235,12 +241,12 @@ def add_dash(arr) # добавить "-"
   vowel_indexes = []
   arr.each_with_index do |el, i|
       
-      # создаем массив с индексами гласных границы, в пределах которых ставить -
     
     vowel_indexes << i if VOWELS.any?(el)
   
   end
 
+    # создаем массив с индексами гласных границы, в пределах которых ставить -
     dash_zone_borders = [                 
                             # не допустить, чтобы - отделил одну гласную слева
       vowel_indexes[0]  == 0 ? 2 : vowel_indexes[0] + 1,
