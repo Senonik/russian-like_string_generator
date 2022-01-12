@@ -246,7 +246,7 @@ def add_dash(arr) # добавить "-"
   
   end
 
-    # создаем массив с индексами гласных границы, в пределах которых ставить -
+    # создаем массив с индексами гласных, т.е. границы, в пределах которых ставить "-"
     dash_zone_borders = [                 
                             # не допустить, чтобы - отделил одну гласную слева
       vowel_indexes[0]  == 0 ? 2 : vowel_indexes[0] + 1,
@@ -276,21 +276,4 @@ end
 
 def generate_multi_syllable_word
   generate_single_syllable_word + generate_single_syllable_word
-end
-
-                
-  # it "should not contain word over 15 letters"
-  # it "should not allow unwanted symbols inside words" 
-  # it "should not allow words starting from: ь,ы,ъ" 
-  # it "should always have a vowel after й at the beginning of the world" 
-  # it "should allow only particular letters after й inside words" 
-  # it "should always be vowel in 2- and 3- letter words"
-  # it "should allow only particular one-letter words"
-  # it "should not allow more than 4 consonant letters in a row"
-  # it "should not allow more than 2 vowel letters in a row"
-  # it "should not allow more than 2 same consonant letters in a row" 
-  # it "should contain at least 40% vowels in multisyllable words" 
-  # it "should contain 5 or less consonant letters in single-syllable words" 
-  # it "should allow я,е,ё,ю after ъ" 
-  # it "should not allow a vowel at the beginning of the word"\
-  #    "in single-syllable words if they have 3 or more letters" 
+end 
